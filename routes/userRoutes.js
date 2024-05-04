@@ -1,5 +1,11 @@
 const express = require("express");
-const { register } = require("../handlers/userHandler");
+const {
+  register,
+  login,
+  verifyEmail,
+  getCurrentUser,
+} = require("../handlers/userHandler");
+const { checkAuth } = require("../middlewares/checkAuth");
 const router = express.Router();
 
 router.get("/", (req, res) => {
@@ -9,5 +15,14 @@ router.get("/", (req, res) => {
 
 //Register new user
 router.post("/register", register);
+
+//Verify Email
+router.post("/verify", verifyEmail);
+
+//Login
+router.post("/login", login);
+
+//Get current user
+router.get("/current-user", checkAuth, getCurrentUser);
 
 module.exports = router;
