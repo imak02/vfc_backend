@@ -37,7 +37,7 @@ const register = async (req, res) => {
     if (usernameNotAvailable) {
       return res.status(400).send({
         success: false,
-        message: "Username is already taken.",
+        message: "username is already taken.",
         data: null,
       });
     }
@@ -93,14 +93,24 @@ const verifyEmail = async (req, res) => {
   }
 
   try {
-    const verifiedUser = await User.findOneAndUpdate(
-      { otp },
-      { emailVerified: true },
-      { new: true }
+    const foundUser = await User.findOneAndUpdate(
+      { email, otp }, // Match the email and OTP
+      { $set: { emailVerified: true }, $unset: { otp: 1 } }, // Update emailVerified to true and unset otp
+      { new: true } // Return the updated document
     );
 
-    if (verifiedUser) {
-      res.status(200).send("Email Address verified!!!");
+    if (foundUser) {
+      return res.status(200).send({
+        success: true,
+        message: "Email Address verified!!!",
+        data: null,
+      });
+    } else {
+      return res.status(400).send({
+        success: false,
+        message: "Please enter valid otp!!!",
+        data: null,
+      });
     }
   } catch (error) {
     errorHandler({ error, res });
@@ -176,4 +186,104 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, verifyEmail, getCurrentUser };
+//Fetch user with userId
+const fetchUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const foundUser = await User.findById(userId);
+
+    if (!foundUser) {
+      return res.status(400).send({
+        success: false,
+        message: "The requested user does not exist.",
+        data: null,
+      });
+    }
+
+    return res.status(200).send({
+      success: true,
+      message: "User fetched successfully",
+      data: foundUser,
+    });
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
+//Update user profile
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { firstName, lastName, username, email, phone, address, country } =
+      req.body;
+
+    const emailAlreadyExists = await User.findOne({ email: email.trim() });
+    if (emailAlreadyExists) {
+      if (emailAlreadyExists._id.toString() !== userId) {
+        return res.status(400).send({
+          success: false,
+          message: "Email is already registered with another profile.",
+          data: null,
+        });
+      }
+    }
+
+    //Checking if email is updated or same to change the verification status
+    const foundUser = await User.findById(userId);
+    if (foundUser.email !== email.trim()) {
+      emailVerified = false;
+    } else {
+      emailVerified = foundUser.emailVerified;
+    }
+
+    console.log(req.file);
+
+    const usernameNotAvailable = await User.findOne({
+      username: username.trim(),
+    });
+    if (usernameNotAvailable) {
+      if (usernameNotAvailable._id.toString() !== userId) {
+        return res.status(400).send({
+          success: false,
+          message: "Username is already taken.",
+          data: null,
+        });
+      }
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      { _id: userId },
+      {
+        profilePicture: req.file && `/${req.file.path}`,
+        firstName,
+        lastName,
+        username,
+        email,
+        phone,
+        address,
+        country,
+        emailVerified,
+      },
+      { new: true }
+    );
+
+    if (updatedUser) {
+      return res.status(200).send({
+        success: true,
+        message: "Profile updated successfully",
+        data: updatedUser,
+      });
+    }
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  verifyEmail,
+  getCurrentUser,
+  fetchUser,
+  updateUser,
+};

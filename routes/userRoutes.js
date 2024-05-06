@@ -4,8 +4,11 @@ const {
   login,
   verifyEmail,
   getCurrentUser,
+  fetchUser,
+  updateUser,
 } = require("../handlers/userHandler");
 const { checkAuth } = require("../middlewares/checkAuth");
+const { profilePicMiddleware } = require("../middlewares/profilePic");
 const router = express.Router();
 
 router.get("/", (req, res) => {
@@ -24,5 +27,16 @@ router.post("/login", login);
 
 //Get current user
 router.get("/current-user", checkAuth, getCurrentUser);
+
+//Get user with userId
+router.get("/:userId", fetchUser);
+
+//Update user profile
+router.put(
+  "/update-profile/:userId",
+  checkAuth,
+  profilePicMiddleware,
+  updateUser
+);
 
 module.exports = router;

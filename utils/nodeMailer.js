@@ -21,7 +21,7 @@ const sendMail = async ({ to, subject, text, html }) => {
   try {
     let info = await transporter.sendMail(message);
     console.log("Message sent: %s", info.messageId);
-    console.log(info);
+    // console.log(info);
     // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
   } catch (error) {
     console.log(error);
