@@ -121,8 +121,6 @@ const verifyEmail = async (req, res) => {
 const login = async (req, res, next) => {
   const { user, password } = req.body;
 
-  console.log(user);
-
   try {
     const foundUser = await User.findOne({
       $or: [{ email: user }, { username: user }],
@@ -279,6 +277,60 @@ const updateUser = async (req, res) => {
   }
 };
 
+//Change Password
+const changePassword = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { oldPassword, newPassword } = req.body;
+
+    const foundUser = await User.findById(userId).select([
+      "username",
+      "email",
+      "password",
+    ]);
+
+    if (!foundUser) {
+      return res.status(400).send({
+        success: false,
+        message: "User does not exist.",
+        data: null,
+      });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(
+      oldPassword,
+      foundUser.password
+    );
+
+    if (!isPasswordCorrect) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid credentials",
+        data: null,
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    if (updatedUser) {
+      return res.status(200).send({
+        success: true,
+        message:
+          "Password changed successfully. Please login with your new password",
+        data: null,
+      });
+    }
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -286,4 +338,5 @@ module.exports = {
   getCurrentUser,
   fetchUser,
   updateUser,
+  changePassword,
 };

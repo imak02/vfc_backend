@@ -6,6 +6,7 @@ const {
   getCurrentUser,
   fetchUser,
   updateUser,
+  changePassword,
 } = require("../handlers/userHandler");
 const { checkAuth } = require("../middlewares/checkAuth");
 const { profilePicMiddleware } = require("../middlewares/profilePic");
@@ -38,5 +39,8 @@ router.put(
   profilePicMiddleware,
   updateUser
 );
+
+//Change Password
+router.put("/change-password", checkAuth, changePassword);
 
 module.exports = router;
