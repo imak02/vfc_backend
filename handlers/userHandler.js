@@ -331,6 +331,102 @@ const changePassword = async (req, res) => {
   }
 };
 
+//Forgot Password
+const forgotPassword = async (req, res) => {
+  try {
+    const email = req.body.email;
+
+    if (!email) {
+      return res.status(400).send({
+        success: false,
+        message: "Email must be included.",
+        data: null,
+      });
+    }
+
+    const foundUser = await User.findOne({ email: email.trim() });
+
+    if (!foundUser) {
+      return res.status(400).send({
+        success: false,
+        message: "Please enter a valid email address",
+        data: null,
+      });
+    }
+
+    const otp = foundUser.generateOTP();
+    foundUser.save();
+
+    sendMail({
+      to: email,
+      subject: "Password Reset",
+      text: "Use the otp below to reset your password",
+      html: `<p>Your password reset otp is: </p> <h1>${otp}</h1>  This otp will expire in 5 minutes.`,
+    });
+
+    return res.status(200).send({
+      success: true,
+      message: "Please check your email for password reset code",
+      data: email,
+    });
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
+//Reset Password
+const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, password } = req.body;
+
+    if (!email || !otp || !password) {
+      return res.status(400).send({
+        success: false,
+        message: "Incomplete details",
+        data: null,
+      });
+    }
+
+    const foundUser = await User.findOne({ email: email.trim() });
+
+    if (!foundUser) {
+      return res.status(400).send({
+        success: false,
+        message: "Please enter a valid email address",
+        data: null,
+      });
+    }
+
+    const numberOtp = parseInt(otp);
+
+    if (foundUser.otp !== numberOtp) {
+      return res.status(400).send({
+        success: false,
+        message: "Please enter a valid otp",
+        data: null,
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const changedPassword = await User.findOneAndUpdate(
+      { email: email.trim() },
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    if (changedPassword) {
+      return res.status(200).send({
+        success: true,
+        message: "Password changed successfully",
+        data: null,
+      });
+    }
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -339,4 +435,6 @@ module.exports = {
   fetchUser,
   updateUser,
   changePassword,
+  forgotPassword,
+  resetPassword,
 };
