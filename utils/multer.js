@@ -2,6 +2,7 @@ const multer = require("multer");
 const fs = require("fs");
 
 const profileDestinationFolder = "uploads/user";
+const blogDestinationFolder = "uploads/blog";
 
 const profileMulterStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -17,6 +18,20 @@ const profileMulterStorage = multer.diskStorage({
   },
 });
 
+const blogMulterStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (!fs.existsSync(blogDestinationFolder)) {
+      fs.mkdirSync(blogDestinationFolder);
+    }
+    cb(null, blogDestinationFolder);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = file.mimetype.split("/")[1];
+    cb(null, "blogImg" + "-" + uniqueSuffix + "." + ext);
+  },
+});
+
 const multerFilter = function (req, file, cb) {
   if (file.mimetype.startsWith("image")) {
     cb(null, true);
@@ -25,4 +40,4 @@ const multerFilter = function (req, file, cb) {
   }
 };
 
-module.exports = { profileMulterStorage, multerFilter };
+module.exports = { profileMulterStorage, blogMulterStorage, multerFilter };

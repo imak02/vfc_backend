@@ -34,6 +34,7 @@ const userSchema = new Schema({
     type: Number,
   },
   emailVerified: { type: Boolean, default: false },
+  blogs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Blog" }],
 });
 
 userSchema.methods.generateOTP = function () {

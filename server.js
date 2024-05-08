@@ -6,6 +6,7 @@ const path = require("path");
 require("./database");
 
 const userRoutes = require("./routes/userRoutes");
+const blogRoutes = require("./routes/blogRoutes");
 
 const port = process.env.PORT ?? 8000;
 
@@ -19,6 +20,9 @@ app.get("/", (req, res) => {
 
 //User routes
 app.use("/user", userRoutes);
+
+//Blog routes
+app.use("/blog", blogRoutes);
 
 //Uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
