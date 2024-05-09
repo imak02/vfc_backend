@@ -5,6 +5,7 @@ const {
   getBlogById,
   editBlog,
   deleteBlog,
+  getBlogByAuthor,
 } = require("../handlers/blogHandler");
 const { blogPicMiddleware } = require("../middlewares/blogPic");
 const { checkAuth } = require("../middlewares/checkAuth");
@@ -29,5 +30,8 @@ router.put("/:blogId", checkAuth, blogPicMiddleware, editBlog);
 
 //Delete blog
 router.delete("/:blogId", checkAuth, deleteBlog);
+
+//Get blog by author
+router.get("/author/:authorId", getBlogByAuthor);
 
 module.exports = router;

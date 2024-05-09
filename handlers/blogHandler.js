@@ -160,10 +160,36 @@ const deleteBlog = async (req, res) => {
   }
 };
 
+//Get blogs by author Id
+const getBlogByAuthor = async (req, res) => {
+  try {
+    const authorId = req.params.authorId;
+
+    const blogs = await Blog.find({ author: authorId }).populate("author");
+
+    if (!blogs) {
+      return res.status(400).send({
+        success: false,
+        message: "There are no blogs available",
+        data: null,
+      });
+    } else {
+      return res.status(200).send({
+        success: true,
+        message: "Blogs fetched successfully.",
+        data: blogs,
+      });
+    }
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
 module.exports = {
   createBlog,
   fetchAllBlogs,
   getBlogById,
   editBlog,
   deleteBlog,
+  getBlogByAuthor,
 };
