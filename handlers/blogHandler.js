@@ -185,6 +185,93 @@ const getBlogByAuthor = async (req, res) => {
   }
 };
 
+//Like a blog
+const likeBlog = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const blogId = req.params.blogId;
+
+    const blog = await Blog.findById(blogId);
+    await blog.toggleLike(userId);
+
+    return res.status(200).send({
+      success: true,
+      message: "Action was successful",
+      data: null,
+    });
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
+//Save blog
+const saveBlog = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const blogId = req.params.blogId;
+
+    const blog = await Blog.findById(blogId);
+    await blog.toggleSave(userId);
+
+    return res.status(200).send({
+      success: true,
+      message: "Action was successful",
+      data: null,
+    });
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
+//Get liked blogs of User
+const getLikedBlog = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const blogs = await Blog.find({ likes: userId }).populate("author");
+
+    if (blogs) {
+      return res.status(200).send({
+        success: true,
+        message: "Blogs fetched successfully",
+        data: blogs,
+      });
+    } else {
+      return res.status(400).send({
+        success: true,
+        message: "There are no blogs available",
+        data: null,
+      });
+    }
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
+//Get saved blogs of User
+const getSavedBlog = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const blogs = await Blog.find({ saves: userId }).populate("author");
+    if (blogs) {
+      return res.status(200).send({
+        success: true,
+        message: "Blogs fetched successfully",
+        data: blogs,
+      });
+    } else {
+      return res.status(400).send({
+        success: true,
+        message: "There are no blogs available",
+        data: null,
+      });
+    }
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
 module.exports = {
   createBlog,
   fetchAllBlogs,
@@ -192,4 +279,8 @@ module.exports = {
   editBlog,
   deleteBlog,
   getBlogByAuthor,
+  likeBlog,
+  saveBlog,
+  getLikedBlog,
+  getSavedBlog,
 };

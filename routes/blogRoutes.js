@@ -6,6 +6,10 @@ const {
   editBlog,
   deleteBlog,
   getBlogByAuthor,
+  likeBlog,
+  saveBlog,
+  getLikedBlog,
+  getSavedBlog,
 } = require("../handlers/blogHandler");
 const { blogPicMiddleware } = require("../middlewares/blogPic");
 const { checkAuth } = require("../middlewares/checkAuth");
@@ -22,6 +26,15 @@ router.get("/all", fetchAllBlogs);
 //Create new blog
 router.post("/new", checkAuth, blogPicMiddleware, createBlog);
 
+//Liked blog of user
+router.get("/liked", checkAuth, getLikedBlog);
+
+//Saved blog of user
+router.get("/saved", checkAuth, getSavedBlog);
+
+//Get blog by author
+router.get("/author/:authorId", getBlogByAuthor);
+
 //Get blog by id
 router.get("/:blogId", getBlogById);
 
@@ -31,7 +44,10 @@ router.put("/:blogId", checkAuth, blogPicMiddleware, editBlog);
 //Delete blog
 router.delete("/:blogId", checkAuth, deleteBlog);
 
-//Get blog by author
-router.get("/author/:authorId", getBlogByAuthor);
+//Like blog
+router.post("/:blogId/like", checkAuth, likeBlog);
+
+//Save blog
+router.post("/:blogId/save", checkAuth, saveBlog);
 
 module.exports = router;
