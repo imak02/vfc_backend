@@ -3,6 +3,8 @@ const {
   createBlog,
   fetchAllBlogs,
   getBlogById,
+  editBlog,
+  deleteBlog,
 } = require("../handlers/blogHandler");
 const { blogPicMiddleware } = require("../middlewares/blogPic");
 const { checkAuth } = require("../middlewares/checkAuth");
@@ -13,13 +15,19 @@ router.get("/", (req, res) => {
   console.log("Blog routes");
 });
 
-//Create new blog
-router.post("/new", checkAuth, blogPicMiddleware, createBlog);
-
 //Fetch all blogs
 router.get("/all", fetchAllBlogs);
 
+//Create new blog
+router.post("/new", checkAuth, blogPicMiddleware, createBlog);
+
 //Get blog by id
 router.get("/:blogId", getBlogById);
+
+//Edit blog
+router.put("/:blogId", checkAuth, blogPicMiddleware, editBlog);
+
+//Delete blog
+router.delete("/:blogId", checkAuth, deleteBlog);
 
 module.exports = router;

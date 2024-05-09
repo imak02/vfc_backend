@@ -86,4 +86,84 @@ const getBlogById = async (req, res) => {
   }
 };
 
-module.exports = { createBlog, fetchAllBlogs, getBlogById };
+//Edit blog
+const editBlog = async (req, res) => {
+  try {
+    const blogId = req.params.blogId;
+    const { title, description, category, content } = req.body;
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+
+    const blog = await Blog.findById(blogId);
+    if (userId != blog.author) {
+      return res.status(400).send({
+        success: false,
+        message: "Unauthorized request",
+        data: null,
+      });
+    }
+
+    const editedBlog = await Blog.findByIdAndUpdate(
+      { _id: blogId },
+      {
+        title,
+        description,
+        category,
+        image: req.file && `/${req.file.path}`,
+        content,
+        author: userId,
+      },
+      { new: true }
+    );
+
+    if (editedBlog) {
+      return res.status(200).send({
+        success: true,
+        message: "Blog edited successfully",
+        data: editedBlog,
+      });
+    }
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
+//Delete blog
+const deleteBlog = async (req, res) => {
+  try {
+    const blogId = req.params.blogId;
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+
+    const blog = await Blog.findById(blogId);
+    if (userId != blog.author) {
+      return res.status(400).send({
+        success: false,
+        message: "Unauthorized request",
+        data: null,
+      });
+    }
+
+    const deleted = await Blog.findByIdAndDelete(blogId);
+
+    if (deleted) {
+      user.blogs.pop(deleted);
+      user.save();
+      return res.status(200).send({
+        success: true,
+        message: "Blog deleted successfully.",
+        data: null,
+      });
+    }
+  } catch (error) {
+    errorHandler({ error, res });
+  }
+};
+
+module.exports = {
+  createBlog,
+  fetchAllBlogs,
+  getBlogById,
+  editBlog,
+  deleteBlog,
+};
