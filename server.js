@@ -7,6 +7,7 @@ require("./database");
 
 const userRoutes = require("./routes/userRoutes");
 const blogRoutes = require("./routes/blogRoutes");
+const commentRoutes = require("./routes/commentRoutes");
 
 const port = process.env.PORT ?? 8000;
 
@@ -23,6 +24,9 @@ app.use("/user", userRoutes);
 
 //Blog routes
 app.use("/blog", blogRoutes);
+
+//Comment Routes
+app.use("/comment", commentRoutes);
 
 //Uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
